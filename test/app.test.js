@@ -97,3 +97,28 @@ it("should sort by app name", () => {
       expect(sorted).to.be.true;
     });
 });
+
+// checks that the array sorts correctly when sorted by genre
+it("should only display action apps", () => {
+  return supertest(app)
+    .get("/apps")
+    .query({ genre: "action" })
+    .expect(200)
+    .expect("Content-Type", /json/)
+    .then((res) => {
+      expect(res.body).to.be.an("array");
+      let correctGenre = true;
+      let i = 0;
+      while (i < res.body.length ) {
+        const appAtIndex = res.body[i];
+        if (!appAtIndex.Genres.includes('Action')) {
+          correctGenre= false;
+          break;
+        }
+        i++;
+      }
+      expect(correctGenre).to.be.true;
+    });
+});
+
+
