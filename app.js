@@ -6,11 +6,20 @@ const playstore = require("./data/playstore");
 app.use(morgan("common"));
 
 app.get("/", (req, res) => {
-  res.send("Homepage loaded");
+  res.status(200).send("Homepage loaded");
 });
 
 app.get("/apps", (req, res) => {
-  const { sorted, genre = "" } = req.query;
+  const { sorted, genre } = req.query;
+  if (
+    Object.keys(req.query).length !== 0 &&
+    !req.query.sorted &&
+    !req.query.genre
+  ) {
+    return res
+      .status(400)
+      .send('Sort must be either app or rating');
+  }
   let results = playstore;
   // checks if user asked to sort the array
   if (sorted) {
@@ -39,7 +48,7 @@ app.get("/apps", (req, res) => {
 
   if (sorted) {
     // sorted results based on either app name or rating
-    // sorted a -> z for app and the sort method is reversed for ratings 
+    // sorted a -> z for app and the sort method is reversed for ratings
     results = results.sort((x, y) => {
       if (sorted === "app") {
         return x[
@@ -49,9 +58,7 @@ app.get("/apps", (req, res) => {
           ? 1
           : -1;
       } else {
-        return x[
-          sorted.charAt(0).toUpperCase() + sorted.slice(1)
-        ] <
+        return x[sorted.charAt(0).toUpperCase() + sorted.slice(1)] <
           y[sorted.charAt(0).toUpperCase() + sorted.slice(1)]
           ? 1
           : -1;
@@ -61,6 +68,4 @@ app.get("/apps", (req, res) => {
   res.json(results);
 });
 
-app.listen(8000, () => {
-  console.log("Server listening on port 8000");
-});
+module.exports = app;
